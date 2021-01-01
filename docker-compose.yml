@@ -1,0 +1,172 @@
+version: '3'
+
+# This patch has all the host volume mounts with ":z" added to the end
+# which will cause Docker on SELinux to automatically set the proper security 
+# context when mounting the host volumes
+
+services:
+  startup:
+    volumes:
+      - ./oada-core/startup:/code/startup:z
+      - ./oada-core/libs:/code/libs:z
+      - ./oada-srvc-docker-config.js:/oada-srvc-docker-config.js:z
+
+  proxy:
+    volumes:
+      - ./domains-available:/domains-available:z
+      - ./domains-enabled:/domains-enabled:z
+      - ./oada-core/proxy/nginx.conf:/etc/nginx/nginx.conf:z
+      - ./oada-core/proxy/dev-sites-enabled/:/etc/nginx/sites-templates/:z
+      - proxy_certs:/certs:z
+      - ./oada-core/proxy/dev-certs/localhost:/certs/localhost:z
+      - ./oada-core/proxy:/code/proxy:z
+      - ./oada-srvc-docker-config.js:/oada-srvc-docker-config.js:z
+      # Need the letsencrypt_www_data volume so admin's certbot command can put web-accessible files there
+      - letsencrypt_www_data:/var/www/letsencrypt:z
+
+  auth:
+    volumes:
+      - ./domains-available:/domains-available:z
+      - ./domains-enabled:/domains-enabled:z
+      - ./oada-core/auth:/code/auth:z
+      - ./oada-core/libs:/code/libs:z
+      - ./oada-srvc-docker-config.js:/oada-srvc-docker-config.js:z
+
+  # http-handler is in charge of maintaining connectiongs to clients and starting
+  # the first message for a request into Kafka
+  http-handler:
+    volumes:
+      - ./oada-core/http-handler:/code/http-handler:z
+      - ./oada-core/libs:/code/libs:z
+      - ./oada-srvc-docker-config.js:/oada-srvc-docker-config.js:z
+
+  sync-handler:
+    volumes:
+      - ./oada-core/sync-handler:/code/sync-handler:z
+      - ./oada-core/libs:/code/libs:z
+      - ./oada-srvc-docker-config.js:/oada-srvc-docker-config.js:z
+
+  write-handler:
+    volumes:
+      - ./oada-core/write-handler:/code/write-handler:z
+      - ./oada-core/libs:/code/libs:z
+      - ./oada-srvc-docker-config.js:/oada-srvc-docker-config.js:z
+
+  users:
+    volumes:
+      - ./oada-core/users:/code/users:z
+      - ./oada-core/libs:/code/libs:z
+      - ./oada-srvc-docker-config.js:/oada-srvc-docker-config.js:z
+
+  token-lookup:
+    volumes:
+      - ./oada-core/token-lookup:/code/token-lookup:z
+      - ./oada-core/libs:/code/libs:z
+      - ./oada-srvc-docker-config.js:/oada-srvc-docker-config.js:z
+
+  rev-graph-update:
+    volumes:
+      - ./oada-core/rev-graph-update:/code/rev-graph-update:z
+      - ./oada-core/libs:/code/libs:z
+      - ./oada-srvc-docker-config.js:/oada-srvc-docker-config.js:z
+
+  graph-lookup:
+    volumes:
+      - ./oada-core/graph-lookup:/code/graph-lookup:z
+      - ./oada-core/libs:/code/libs:z
+      - ./oada-srvc-docker-config.js:/oada-srvc-docker-config.js:z
+
+  well-known:
+    volumes:
+      - ./oada-core/well-known:/code/well-known:z
+      - ./oada-core/libs:/code/libs:z
+      - ./oada-srvc-docker-config.js:/oada-srvc-docker-config.js:z
+
+  admin:
+    volumes:
+      - ./domains-available:/domains-available:z
+      - ./domains-enabled:/domains-enabled:z
+      - ./oada-srvc-docker-config.js:/oada-srvc-docker-config.js:z
+      - arangodb_data:/volumes/arangodb:z
+      - arangodb_apps_data:/volumes/arangodb_apps:z
+      - zookeeper_data:/volumes/zookeeper:z
+      - kafka_data:/volumes/kafka:z
+      - ./oada-core/admin:/code/admin:z
+      - ./oada-core/auth:/code/auth:z
+      - ./oada-core/graph-lookup:/code/graph-lookup:z
+      - ./oada-core/http-handler:/code/http-handler:z
+      - ./oada-core/libs:/code/libs:z
+      - ./oada-core/permissions-handler:/code/permissions-handler:z
+      - ./oada-core/proxy:/code/proxy:z
+      - ./oada-core/rev-graph-update:/code/rev-graph-update:z
+      - ./oada-core/shares:/code/shares:z
+      - ./oada-core/startup:/code/startup:z
+      - ./oada-core/sync-handler:/code/sync-handler:z
+      - ./oada-core/tests:/code/tests:z
+      - ./oada-core/token-lookup:/code/token-lookup:z
+      - ./oada-core/users:/code/users:z
+      - ./oada-core/webhooks:/code/webhooks:z
+      - ./oada-core/well-known:/code/well-known:z
+      - ./oada-core/write-handler:/code/write-handler:z
+      - ./oada-core/yarn:/code/yarn:z
+      - ./scopes:/code/scopes:z
+      - /var/run/docker.sock:/var/run/docker.sock:z
+      - letsencrypt_www_data:/var/www/letsencrypt:z
+      - proxy_certs:/etc/letsencrypt:z
+      - proxy_certs:/certs:z
+
+  kafka:
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:z
+      - kafka_data:/var/lib/kafka:z
+
+  yarn:
+    volumes:
+      - ./oada-core/admin:/code/admin:z
+      - ./oada-core/auth:/code/auth:z
+      - ./oada-core/graph-lookup:/code/graph-lookup:z
+      - ./oada-core/http-handler:/code/http-handler:z
+      - ./oada-core/libs:/code/libs:z
+      - ./oada-core/permissions-handler:/code/permissions-handler:z
+      - ./oada-core/proxy:/code/proxy:z
+      - ./oada-core/rev-graph-update:/code/rev-graph-update:z
+      - ./oada-core/shares:/code/shares:z
+      - ./oada-core/startup:/code/startup:z
+      - ./oada-core/sync-handler:/code/sync-handler:z
+      - ./oada-core/tests:/code/tests:z
+      - ./oada-core/token-lookup:/code/token-lookup:z
+      - ./oada-core/users:/code/users:z
+      - ./oada-core/webhooks:/code/webhooks:z
+      - ./oada-core/well-known:/code/well-known:z
+      - ./oada-core/write-handler:/code/write-handler:z
+      - ./oada-core/yarn:/code/yarn:z
+
+  arangodb:
+    volumes:
+      - arangodb_data:/var/lib/arangodb3:z
+      - arangodb_data:/var/lib/arangodb3-apps:z
+
+  zookeeper:
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper:z
+
+  webhooks:
+    volumes:
+      - ./oada-core/webhooks:/code/webhooks:z
+      - ./oada-core/libs:/code/libs:z
+      - ./oada-srvc-docker-config.js:/oada-srvc-docker-config.js:z
+
+  permissions-handler:
+    volumes:
+      - ./oada-core/permissions-handler:/code/permissions-handler:z
+      - ./oada-core/libs:/code/libs:z
+      - ./oada-srvc-docker-config.js:/oada-srvc-docker-config.js:z
+      - ./scopes:/code/scopes:z
+
+  shares:
+    volumes:
+      - ./oada-core/shares:/code/shares:z
+      - ./oada-core/libs:/code/libs:z
+      - ./oada-srvc-docker-config.js:/oada-srvc-docker-config.js:z
+
+
